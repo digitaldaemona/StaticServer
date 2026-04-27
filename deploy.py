@@ -18,8 +18,7 @@ SERVER_PORT = 1500
 ACCESS_PORT = 80
 
 REMOTE_USER = "ec2-user"
-REMOTE_HOST = "3.129.121.42"
-KEY_PATH = "PersonalServerKey.pem"
+KEY_PATH = "ServerKey.pem"
 REMOTE_DIR = f"/home/{REMOTE_USER}/"
 REMOTE_SITE_DIR = f"/home/{REMOTE_USER}/site/"
 LOCAL_SITE_DIR = "site"
@@ -33,6 +32,7 @@ LOCAL_FILES = [
 ]
 
 load_dotenv()
+REMOTE_HOST = os.getenv("SERVER_IP")
 ADMIN_USER = os.getenv("ADMIN_USER")
 ADMIN_PASS = os.getenv("ADMIN_PASS")
 
@@ -192,11 +192,11 @@ def server_deploy():
     ssh_cmd.append(f"mkdir -p {REMOTE_DIR}")
     run_command(ssh_cmd)
 
-    # Sync local files
+    # Sync local files, deleting others
     print("Transferring files with rsync...")
     for file_name in LOCAL_FILES:
         rsync_cmd = [
-            "rsync", "-r", "-a", "-z",
+            "rsync", "-r", "-a", "-z", "--delete",
             "-e", f"ssh -i {KEY_PATH}",
             file_name,
             f"{REMOTE_USER}@{REMOTE_HOST}:{REMOTE_DIR}"

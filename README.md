@@ -8,7 +8,7 @@ This is the webserver made for the mayaglyphs.org site
 
 ### AWS
 This is meant to run on an AWS lightsail instance
-The keypair for SSH access to the instance should be stored as PersonalServerKey.pem
+The keypair for SSH access to the instance should be stored as ServerKey.pem
 After making the lightsail instance, assign it a static IP
 
 ### pip3
@@ -22,7 +22,6 @@ sudo yum install python3-pip -y
 In order to serve the webserver on the right port, Nginx is used
 To install Nginx on the lightsail instance:
 ```
-sudo yum update -y
 sudo yum install nginx -y
 ```
 Then start it and enable it on boot
@@ -34,29 +33,29 @@ Next open the configuration
 ```
 sudo nano /etc/nginx/nginx.conf
 ```
-Find the location/ block and edit it
+Replace the server block inside the http block
 ```
-# Example snippet inside the http or server block of nginx.conf (replace error stubs)
-server {
-    listen 80;
-    server_name LIGHTSAIL_PUBLIC_IP;
+# Example snippet inside the http block of nginx.conf (replace error stubs)
+    server {
+        listen 80;
+        server_name LIGHTSAIL_DOMAIN_OR_PUBLIC_IP;
 
-    location / {
-        # Pass all requests coming to port 80 to the Python server on 1500
-        proxy_pass http://127.0.0.1:1500; 
+        location / {
+            # Pass all requests coming to port 80 to the Python server on 1500
+            proxy_pass http://127.0.0.1:1500;
 
-        # Headers for proxying
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+            # Headers for proxying
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
 
-        # Increase buffer size
-        proxy_buffer_size 128k; 
-        proxy_buffers 4 256k; 
-        proxy_busy_buffers_size 256k;
+            # Increase buffer size
+            proxy_buffer_size 128k;
+            proxy_buffers 4 256k;
+            proxy_busy_buffers_size 256k;
+        }
     }
-}
 ```
 Finally, test the new configuration and restart Nginx
 ```
@@ -71,7 +70,6 @@ To enable port 443 (HTTPS) a few more steps are needed
 2. Must have a domain name associated with the instance
 3. Install Certbot
 ```
-sudo yum update -y
 sudo yum install certbot python3-certbot-nginx -y
 ```
 4. Edit the Nginx config again and change server_name to be the domain instead of the IP (if needed)
@@ -82,7 +80,7 @@ sudo systemctl reload nginx
 ```
 5. Run certbot to generate the https cert
 ```
-sudo certbot --nginx -d domain.com
+sudo certbot --nginx -d DOMAIN
 sudo systemctl reload nginx
 ```
 HTTPS should now be live! Certbot will autorenew the cert every 90 days
@@ -96,9 +94,22 @@ python3 -m venv .venv
 Use the deploy.py script to deploy the server both locally (for testing) and remotely
 ```
 ./deploy.py local
+./deploy.py remote
 ```
 Additionally, use the deploy.py script to deploy the site itself from a zip file separately
 ```
-./deploy.py local-site
+./deploy.py local-site zip_file
+./deploy.py remote-site zip_file
 ```
 Note: this will replace the entire contents of ~/site/ on the server (or site/ locally) with the zip file contents
+
+## Monitoring & Cleanup
+To stop the server, use CTRL-C locally or the following commands for remote. The second command must be run on the server, but both do the same thing.
+```
+./deploy.py kill
+sudo systemctl stop pyserver
+```
+On the remote server, use the following command to check server status
+```
+systemctl status pyserver
+```
