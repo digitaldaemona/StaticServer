@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(.env)",
+      "Read(ServerKey.pem)",
+      "Read(.venv/)",
+      "Read(**/.DS_Store)",
+      "Read(**/__pycache__/)",
+      "Read(backups/)",
+      "Read(site/)",
+      "Read(logs/)"
+    ]
+  }
+}

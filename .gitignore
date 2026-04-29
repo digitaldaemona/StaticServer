@@ -6,4 +6,3 @@ ServerKey.pem
 backups/
 site/
 logs/
-.claude/settings.local.json
