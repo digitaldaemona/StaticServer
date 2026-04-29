@@ -1,11 +1,9 @@
-PersonalServerKey.pem
+ServerKey.pem
 .venv/
 .env
-.DS_Store
 **/.DS_Store
-__pycache__/
 **/__pycache__/
-backups/*
-site/*
-logs/*
-requests.log
+backups/
+site/
+logs/
+.claude/settings.local.json
