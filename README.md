@@ -2,14 +2,14 @@
 
 ## Introduction
 
-This is the webserver made for the mayaglyphs.org site 
+This is the webserver made for hosting static content. It can be extended with various admin pages.
 
 ## Infrastucture
 
-### AWS
-This is meant to run on an AWS lightsail instance
+### Server
+This is tested on an AWS lightsail instance but should work on any similar linux server.
 The keypair for SSH access to the instance should be stored as ServerKey.pem
-After making the lightsail instance, assign it a static IP
+After making the lightsail instance, assign it a static IP. 
 
 ### pip3
 Make sure pip3 is installed on the server so python3 can import modules
@@ -113,3 +113,5 @@ On the remote server, use the following command to check server status
 ```
 systemctl status pyserver
 ```
+
+## Managing Logs
