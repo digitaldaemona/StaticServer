@@ -1,9 +1,7 @@
-import functools
 import os
 import sys
-from dotenv import load_dotenv
 from . import logger
-from flask import Flask, request, jsonify, make_response, send_from_directory, abort, render_template, send_file, after_this_request
+from flask import Flask, request, make_response, send_from_directory, abort
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -22,13 +20,8 @@ app = Flask(__name__,
             template_folder=os.path.join(PROJECT_ROOT, ADMIN_PREFIX))
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
-# Ensure log directories exist before the first request
+# Ensure log directory exist before the first request
 os.makedirs(os.path.join(PROJECT_ROOT, "logs"), exist_ok=True)
-log_files = [logger.LOG_FILE, logger.ERROR_LOG_FILE, logger.LOG_OVERFLOW]
-for file_path in log_files:
-    if not os.path.exists(file_path):
-        with open(file_path, 'a'):
-            pass
 
 # --- Route Definitions ---
 
@@ -92,7 +85,7 @@ def internal_server_error(error):
     except Exception:
         return make_response("<h1>500 Internal Server Error</h1>", 500)
 
-# --- Main Execution ---
+# --- Main Execution (local) ---
 
 if __name__ == "__main__":
     # Only run locally

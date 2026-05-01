@@ -172,7 +172,7 @@ def local_start():
     install_requirements(remote=False, venv_pip=venv_pip)
     local_kill()
     print("Starting local server...")
-    run_command([venv_python, "server/server.py", str(LOCAL_PORT)])
+    run_command([venv_python, "-m", "server.server", str(LOCAL_PORT)])
 
 def server_kill():
     print("Stopping server service...")
