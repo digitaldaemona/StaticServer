@@ -17,6 +17,8 @@ LOG_FORMAT = "[{timestamp}] [{ip}] [{country}/{region}/{city}] [Referrer: {refer
 MAX_RETURN = 1000
 MAX_LOG_SIZE = 40 * 1024 * 1024  # 40 MB in bytes
 MAX_OVERFLOW_SIZE = 5 * 1024 * 1024 * 1024 # 5 GB in bytes
+LOG_NUMBER = os.getenv("LOG_NUMBER")
+LOG_SIZE = os.getenv("LOG_SIZE")
 
 STATIC_ASSET_EXTENSIONS = (
     '.css', '.js', '.jpg', '.jpeg', '.png', '.gif', '.svg', '.ico', 

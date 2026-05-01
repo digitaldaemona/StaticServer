@@ -14,13 +14,7 @@ ADMIN_PREFIX = "admin_pages"
 ERROR_TEMPLATE = "error.html"
 
 INDEX_FILE = "LMGGC.html"
-LOGS_TEMPLATE = "logs.html.jinja"
 ERROR_TEMPLATE = "error.html.jinja"
-
-# .env vars
-load_dotenv()
-USERNAME = os.getenv("ADMIN_USER")
-PASSWORD = os.getenv("ADMIN_PASS")
 
 # --- Flask App Initialization ---
 app = Flask(__name__, 
@@ -35,25 +29,6 @@ for file_path in log_files:
     if not os.path.exists(file_path):
         with open(file_path, 'a'):
             pass
-
-# --- Helper Functions ---
-
-def check_auth():
-    """Checks for Basic Auth headers. Returns True if authorized."""
-    auth = request.authorization
-    if auth and auth.username == USERNAME and auth.password == PASSWORD:
-        return True
-    return False
-
-def requires_auth(f):
-    """Decorator to enforce Basic Authentication."""
-    @functools.wraps(f)
-    def decorated(*args, **kwargs):
-        if not check_auth():
-            return make_response('Access denied: Authentication required.', 401, 
-                                 {'WWW-Authenticate': 'Basic realm="Restricted Logs"'})
-        return f(*args, **kwargs)
-    return decorated
 
 # --- Route Definitions ---
 
@@ -80,7 +55,6 @@ def serve_resources(filename):
 @app.route('/favicon.ico')
 def favicon():
     return serve_resources('favicon.png')
-
     
 @app.after_request
 def log_all_requests(response):

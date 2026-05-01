@@ -2,7 +2,8 @@
 
 ## Introduction
 
-This is the webserver made for hosting static content. It can be extended with various admin pages.
+This is the webserver made for hosting static content. 
+It has request logging and can be extended with various admin pages.
 
 ## Infrastucture
 

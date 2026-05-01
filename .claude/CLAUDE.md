@@ -3,7 +3,7 @@
 ## Project Overview
 - This project is a webserver for hosting a static site
 - It includes tools for deploying the webserver and site content to a local machine (for testing) or a remote server
-- Logging and log rotation functionality is included. 
+- Request logging and log rotation functionality is included. 
 - A section for admin pages is provided for extension capabilities.
 
 ## Project Tooling

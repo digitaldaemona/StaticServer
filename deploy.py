@@ -33,8 +33,8 @@ LOCAL_FILES = [
 
 load_dotenv()
 REMOTE_HOST = os.getenv("SERVER_IP")
-ADMIN_USER = os.getenv("ADMIN_USER")
-ADMIN_PASS = os.getenv("ADMIN_PASS")
+LOG_NUMBER = os.getenv("LOG_NUMBER")
+LOG_SIZE = os.getenv("LOG_SIZE")
 
 # --- Helper Functions ---
 
@@ -121,8 +121,8 @@ User={REMOTE_USER}
 Group={REMOTE_USER}
 WorkingDirectory={REMOTE_DIR}
 Environment="PATH={REMOTE_DIR}.venv/bin"
-Environment="ADMIN_USER={ADMIN_USER}"
-Environment="ADMIN_PASS={ADMIN_PASS}"
+Environment="LOG_NUMBER={LOG_NUMBER}"
+Environment="LOG_SIZE={LOG_SIZE}"
 ExecStart={REMOTE_DIR}.venv/bin/gunicorn --workers 3 --bind 127.0.0.1:{SERVER_PORT} server.server:app
 Restart=always
 
