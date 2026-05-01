@@ -3,11 +3,11 @@
 ## Project Overview
 - This project is a webserver for hosting a static site
 - It includes tools for deploying the webserver and site content to a local machine (for testing) or a remote server
-- Also included are logging and log management tools
+- Request logging and log rotation functionality is included. 
+- A section for admin pages is provided for extension capabilities.
 
 ## Project Tooling
 - The webserver is written in Python/Flask
-- There is some html/css/js for admin pages like logging
 
 ## Deployment
 - Deploy remote: `./deploy.py server`
@@ -20,7 +20,7 @@
 - `backups/` contains zip files of site content
 - `server/` contains the webserver code
 - `resources/` contains assets used by the webserver code such as images, css, and js
-- `admin_pages/` contains jinja templates used for management pages (not thes static site content)
+- `admin_pages/` contains jinja templates used for management pages (not the static site content)
   
 ## Behavior Guidelines
 - Don’t assume. Don’t hide confusion. Surface tradeoffs.

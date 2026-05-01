@@ -2,7 +2,8 @@
 
 ## Introduction
 
-This is the webserver made for hosting static content. It can be extended with various admin pages.
+This is the webserver made for hosting static content. 
+It has request logging and can be extended with various admin pages.
 
 ## Infrastucture
 
@@ -115,3 +116,17 @@ systemctl status pyserver
 ```
 
 ## Managing Logs
+
+Logs are rotated based on the LOG_NUMBER and LOG_SIZE variables. A LOG_NUMBER of 3 and LOG_SIZE of 1024 will result in 4 log files (3 + active file) 1KB each at maximum for a total possible size of 4KB.
+
+Log rotation appends a number that indicates age. The requests.log file is always the latest logs as it is the file that gets written to. The requests.log.1 file is the last full requests log, requests.log.2 is the previous and so on. Every time the requests.log file gets full these are renamed to increment their number, deleting the oldest if LOG_NUMBER is exceeded.
+
+When downloading logs it is recommended to rename the files in the following way: 
+1. Any log file with a number appended to it should have the number replaced with the timestamp from the first log inside it.
+2. If the current .log file is downloaded it should be renamed to have both the timestamp and the word PARTIAL in it so that it is replaced on a subsequent download.
+
+The following command can be used on linux systems to extract the first timestamp from a log file.
+```
+head -c 21 requests.log
+```
+For most cases, a naming system that only uses the date component of the timestamp is optimal.
