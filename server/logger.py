@@ -19,15 +19,13 @@ MAX_LOG_SIZE = 40 * 1024 * 1024  # 40 MB in bytes
 MAX_OVERFLOW_SIZE = 5 * 1024 * 1024 * 1024 # 5 GB in bytes
 LOG_NUMBER = os.getenv("LOG_NUMBER")
 LOG_SIZE = os.getenv("LOG_SIZE")
+ERROR_LOG_NUMBER = os.getenv("ERROR_LOG_NUMBER")
+ERROR_LOG_SIZE = os.getenv("ERROR_LOG_SIZE")
 
 STATIC_ASSET_EXTENSIONS = (
     '.css', '.js', '.jpg', '.jpeg', '.png', '.gif', '.svg', '.ico', 
     '.woff', '.woff2', '.ttf', '.otf', '.eot', '.map', '.json', '.txt'
 )
-
-IGNORED_ROUTES = [
-    '/logs'
-]
 
 def get_log_file_path(log_type):
     """Helper to select the correct file based on type."""
@@ -35,31 +33,8 @@ def get_log_file_path(log_type):
         return ERROR_LOG_FILE
     return LOG_FILE
 
-def get_log_size(log_type='requests'):
-    """Returns the size of the specified log file in bytes"""
-    target_file = get_log_file_path(log_type)
-    if os.path.exists(target_file):
-        return os.path.getsize(target_file)
-    return 0
-
-def search_logs(term, log_type='requests') -> Dict[str, Any]:
-    """Filters log lines containing the term from the specified file."""
-    target_file = get_log_file_path(log_type)
-    results = []
-    if os.path.exists(target_file):
-        with open(target_file, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-            # Iterate in reverse to show newest logs first
-            for line in reversed(lines): 
-                if term.lower() in line.lower():
-                    results.append(line.strip())
-                    if len(results) >= MAX_RETURN: 
-                        break
-    return {'results': results, 'count': len(results)}
-
-
 def log_error_to_file(message):
-    """Writes a timestamped message to the dedicated error log file."""
+    """Writes a timestamped message to the dedicated error log."""
     if os.path.getsize(ERROR_LOG_FILE) >= MAX_LOG_SIZE:
         return
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -73,10 +48,6 @@ def is_static_asset(url_path):
     
     # Check if the path ends with one of the defined static asset extensions
     if path.lower().endswith(STATIC_ASSET_EXTENSIONS):
-        return True
-    
-    # Also check for common routes that don't serve full pages but aren't files (e.g., favicon)
-    if path in IGNORED_ROUTES:
         return True
         
     return False
@@ -167,29 +138,3 @@ def log_flask_request(request, response):
             f.write(log_entry + "\n")
     except IOError as e:
         print(f"Error writing to log file {log_file}: {e}", file=sys.stderr)
-
-def archive_logs(log_type='requests'):
-    target_file = get_log_file_path(log_type)
-    
-    if os.path.exists(target_file):
-        # Create unique filename
-        prefix = "errors" if log_type == 'error' else "requests"
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        archive_filename = f"{prefix}_archive_{timestamp}.log"
-        archive_path = os.path.join(os.path.dirname(target_file), archive_filename)
-        
-        try:
-            # Rename the current log file
-            os.rename(target_file, archive_path)
-            
-            # Create a new empty log file immediately so logging can continue
-            with open(target_file, 'w'): 
-                pass
-                
-            return archive_path, archive_filename
-            
-        except OSError as e:
-            log_error_to_file(f"OSError during log archive: {e}")
-            return None, None
-            
-    return None, None
