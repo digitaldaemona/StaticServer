@@ -28,15 +28,13 @@ app = Flask(__name__,
             template_folder=os.path.join(PROJECT_ROOT, ADMIN_PREFIX))
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
-@app.before_request
-def setup_logs():
-    """Ensure log directories exist before the first request."""
-    os.makedirs(os.path.join(PROJECT_ROOT, "logs"), exist_ok=True)
-    log_files = [logger.LOG_FILE, logger.ERROR_LOG_FILE, logger.LOG_OVERFLOW]
-    for file_path in log_files:
-        if not os.path.exists(file_path):
-            with open(file_path, 'a'):
-                pass
+# Ensure log directories exist before the first request
+os.makedirs(os.path.join(PROJECT_ROOT, "logs"), exist_ok=True)
+log_files = [logger.LOG_FILE, logger.ERROR_LOG_FILE, logger.LOG_OVERFLOW]
+for file_path in log_files:
+    if not os.path.exists(file_path):
+        with open(file_path, 'a'):
+            pass
 
 # --- Helper Functions ---
 
@@ -81,80 +79,8 @@ def serve_resources(filename):
 # Favicon
 @app.route('/favicon.ico')
 def favicon():
-
     return serve_resources('favicon.png')
 
-# Logs Page (Requires Auth)
-@app.route('/logs')
-@requires_auth
-def logs_page():
-    return render_template(LOGS_TEMPLATE)
-
-# API Endpoints (Requires Auth)
-@app.route('/api/logs/<log_file>')
-@requires_auth
-def api_log_file(log_file):
-    """Serves requests.log or errors.log."""
-    if log_file not in ['requests.log', 'errors.log']:
-        abort(404)
-    
-    # Serve the file directly from the logs/ directory
-    log_path = os.path.join(PROJECT_ROOT, 'logs')
-    return send_from_directory(log_path, log_file, mimetype='text/plain')
-
-@app.route('/api/logs/stats')
-@requires_auth
-def api_log_stats():
-    log_type = request.args.get('type', 'requests')
-    try:
-        current_size = logger.get_log_size(log_type)
-        return jsonify({
-            'size': current_size, 
-            'max_size': logger.MAX_LOG_SIZE
-        })
-    except Exception as e:
-        app.logger.error(f"Failed to fetch log stats: {e}")
-        return jsonify({'error': f"Failed to fetch log stats: {e}", 'code': 500}), 500
-
-@app.route('/api/logs/search')
-@requires_auth
-def api_log_search():
-    log_type = request.args.get('type', 'requests')
-    search_term = request.args.get('q', '')
-    try: 
-        results = logger.search_logs(search_term, log_type)
-        return jsonify(results)
-    except Exception as e:
-        app.logger.error(f"Log search failed: {e}")
-        return jsonify({'error': f"Log search failed due to an internal error: {e}", 'code': 500}), 500
-
-@app.route('/api/logs/archive', methods=['GET'])
-@requires_auth
-def api_log_archive():
-    log_type = request.args.get('type', 'requests')
-    
-    try:
-        # Get the path to the renamed file
-        archive_path, filename = logger.archive_logs(log_type)
-        
-        if archive_path is None:
-             return jsonify({'error': 'Log file not found.'}), 404
-        
-        @after_this_request
-        def cleanup(response):
-            """Deletes the temporary archived log file."""
-            try:
-                os.remove(archive_path)
-                app.logger.info(f"Successfully deleted temporary archive file: {archive_path}")
-            except OSError as e:
-                app.logger.error(f"Error deleting temporary archive file {archive_path}: {e}")
-            return response
-        
-        return send_file(archive_path, as_attachment=True, download_name=filename)
-        
-    except Exception as e:
-        app.logger.error(f"Log archive failed: {e}")
-        return jsonify({'error': str(e)}), 500
     
 @app.after_request
 def log_all_requests(response):
