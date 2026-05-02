@@ -1,4 +1,4 @@
-# Mayaglyphs Webserver
+# Static Webserver
 
 ## Introduction
 
